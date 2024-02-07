@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { obtenerFiltroCalendario } from '../../../data/CalendarioData';
-
+import  decodeJWT  from '../../../utils/decodeToken';
+const jwtDecode = require('jwt-decode');
+import { Buffer } from 'buffer';
 
 export default function CalendarioBody() {
   const [calendarios, setCalendarios] = useState([]);
@@ -12,12 +14,14 @@ export default function CalendarioBody() {
   useEffect(() => {
     // Aquí obtendrías el ID del usuario y cargarías los datos del calendario
     const cargarDatos = async () => {
-  
-      const idUsuario = await AsyncStorage.getItem('userId');
-      setUserId(idUsuario);
-      console.log(idUsuario);
+    const token = await AsyncStorage.getItem('auth-token');
+      //const idUsuario = await AsyncStorage.getItem('userId');
+      const decoded = decodeJWT(token);
+      console.log("decoded: "+decoded.id);
+      setUserId(decoded.id);
+      
       // Aquí llamarías a obtenerFiltroCalendario u obtenerListaCalendario
-      const datosCalendario = await obtenerFiltroCalendario(userId);
+      const datosCalendario = await obtenerFiltroCalendario(decoded.id);
       console.log(datosCalendario);
         setCalendarios(datosCalendario);
     };
@@ -41,7 +45,7 @@ export default function CalendarioBody() {
       <FlatList
         data={calendarios}
         renderItem={renderItem}
-        keyExtractor={item => item.id}
+        keyExtractor={item => item._id}
       />
       
       {/* Aquí podrías agregar botones para agregar un nuevo calendario */}
