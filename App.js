@@ -4,9 +4,10 @@ import LoginPage from './src/components/login.tsx';
 import LandingPage from './src/components/landingPage.tsx';
 // import PerfilPage from './src/components/perfil.tsx';
 import CalendarioBody from './src/components/pages/calendario/calendario.tsx';
+import AgregarCalendario from './src/components/pages/calendario/AgregarCalendario.tsx';
 // import DiagnosticoPage from './src/components/diagnostico.tsx';
 // import VehiculoPage from './src/components/vehiculo.tsx';
-import AuthLoadingScreen from './src//utils/verifyToken.tsx';
+import AuthLoadingScreen from './src/middleware/verifyToken.tsx';
 
 const Stack = createStackNavigator();
 
@@ -15,12 +16,13 @@ function App() {
     <NavigationContainer>
       <Stack.Navigator initialRouteName="AuthLoading">
       <Stack.Screen name="AuthLoading" component={AuthLoadingScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Login" component={LoginPage} />
-        <Stack.Screen name="Landing" component={LandingPage} />
-        {/* <Stack.Screen name="Perfil" component={PerfilPage}/> */}
-        <Stack.Screen name="Calendario" component={CalendarioBody}/>
-        {/* <Stack.Screen name="Diagnosticos" component={DiagnosticoPage}/>
-        <Stack.Screen name="Vehiculos" component={VehiculoPage}/> */}
+        <Stack.Screen name="Login" component={LoginPage} options={{ headerShown: false }} />
+        <Stack.Screen name="Landing" component={LandingPage} options={{ headerShown: false }}/>
+        {/* <Stack.Screen name="Perfil" component={PerfilPage} options={{ headerShown: false }}/> */}
+        <Stack.Screen name="Calendario" component={CalendarioBody} options={{ headerShown: false }}/>
+        <Stack.Screen name="AgregarCalendario" component={AgregarCalendario} />
+        {/* <Stack.Screen name="Diagnosticos" component={DiagnosticoPage} options={{ headerShown: false }}/>
+        <Stack.Screen name="Vehiculos" component={VehiculoPage} options={{ headerShown: false }}/> */}
 
       </Stack.Navigator>
     </NavigationContainer>

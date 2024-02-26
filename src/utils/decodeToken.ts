@@ -1,3 +1,5 @@
+import { Buffer } from 'buffer';
+
 const decodeJWT = (token) => {
     try {
       const base64Payload = token.split('.')[1];
