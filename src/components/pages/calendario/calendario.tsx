@@ -11,7 +11,7 @@ const jwtDecode = require('jwt-decode');
 export default function CalendarioBody() {
   const [calendarios, setCalendarios] = useState([]);
   const [userId, setUserId] = useState('');
-  const navigation = useNavigation();  
+  const navigation = useNavigation();
   
 
   useEffect(() => {
@@ -25,7 +25,7 @@ export default function CalendarioBody() {
       
       // Aquí llamarías a obtenerFiltroCalendario u obtenerListaCalendario
       const datosCalendario = await obtenerFiltroCalendario(decoded.id);
-      console.log(datosCalendario);
+      //console.log(datosCalendario);
         setCalendarios(datosCalendario);
     };
 
