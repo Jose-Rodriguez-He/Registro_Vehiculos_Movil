@@ -21,11 +21,11 @@ const obtenerListaCalendario = async () => {
 
 const obtenerFiltroCalendario = async (userId: string) => {
     try {
-        console.log(process.env.API_URL);
+        console.log("Url del backend "+ API_URL);
         const AllLista = await axios.get(`${API_URL}/calendario/getall`);
         console.log(userId);
         const res = AllLista.data.filter((item: any) => item.propietario_id === userId);
-        console.log(AllLista.data);
+        //console.log(AllLista.data);
         return res;
     } catch (error) {
         console.error("Error fetching calendar data:", error);

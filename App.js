@@ -9,7 +9,10 @@ import AgregarCalendario from './src/components/pages/calendario/AgregarCalendar
 // import VehiculoPage from './src/components/vehiculo.tsx';
 import AuthLoadingScreen from './src/middleware/verifyToken.tsx';
 
-const Stack = createStackNavigator();
+const Stack = createStackNavigator({
+  headerMode: 'none',
+});
+
 
 function App() {
   return (

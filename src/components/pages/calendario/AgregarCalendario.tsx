@@ -80,7 +80,7 @@ export default function AgregarCalendario() {
     //Funcion para el datepicker
     const onChange = (event, selectedDate) => {
       const currentDate = selectedDate || date;
-      setShow(true);
+      setShow(Platform.OS === 'ios');
       setDate(currentDate);
   
       // Process the date values
@@ -114,11 +114,11 @@ export default function AgregarCalendario() {
       {show && (
         <DateTimePicker
           testID="dateTimePicker"
-          value={fechaInicio}
-          //mode={"datetime"}
+          value={date}
+          mode={"date"}
           is24Hour={true}
           display="default"
-          onChange={onChange} 
+          onChange={onChange}
         />
       )}
     </View>

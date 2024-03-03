@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { Icon } from 'react-native-elements'; // Puedes usar react-native-elements para los íconos
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
+import { API_URL, TOKEN_SECRET } from '@env';
 
 
 export default function LoginPage() {
@@ -10,10 +11,12 @@ export default function LoginPage() {
     const [password, setPassword] = useState("");
 
     const navigation = useNavigation();
+    //const Url = API_URL;
+    //console.log(Url);
 
     const handleSubmit = async () => {
         try {
-            const res = await global.fetch(`http://localhost:3001/api/usuario/login`, {
+            const res = await global.fetch(`http://192.168.1.7:3001/api/usuario/login`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
