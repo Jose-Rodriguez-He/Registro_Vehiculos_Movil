@@ -11,12 +11,11 @@ export default function LoginPage() {
     const [password, setPassword] = useState("");
 
     const navigation = useNavigation();
-    //const Url = API_URL;
-    //console.log(Url);
+    const Url = API_URL;
 
     const handleSubmit = async () => {
         try {
-            const res = await global.fetch(`http://192.168.1.7:3001/api/usuario/login`, {
+            const res = await global.fetch(`${Url}/usuario/login`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

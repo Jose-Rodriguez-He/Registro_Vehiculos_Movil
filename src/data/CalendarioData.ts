@@ -34,6 +34,7 @@ const obtenerFiltroCalendario = async (userId: string) => {
 };
 
 const crearItemCalendario = async (item: ItemCalendario) => {
+    console.log("Llego a crear");
     const res = await axios.post(
         `${process.env.API_URL}/calendario/create`,
         item

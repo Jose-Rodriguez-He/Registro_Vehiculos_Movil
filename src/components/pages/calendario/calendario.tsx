@@ -20,7 +20,7 @@ export default function CalendarioBody() {
     const token = await AsyncStorage.getItem('auth-token');
       //const idUsuario = await AsyncStorage.getItem('userId');
       const decoded = decodeJWT(token);
-      console.log("decoded: "+decoded.id);
+      // console.log("decoded: "+decoded.id);
       setUserId(decoded.id);
       
       // Aquí llamarías a obtenerFiltroCalendario u obtenerListaCalendario
@@ -28,9 +28,14 @@ export default function CalendarioBody() {
       //console.log(datosCalendario);
         setCalendarios(datosCalendario);
     };
+    const unsubscribe = navigation.addListener('focus', () => {
+      // Recargar datos del calendario cuando la pantalla obtiene el foco
+      cargarDatos();
+  });
 
     cargarDatos();
-  }, []);
+    return unsubscribe;
+  }, [navigation]);
 
   const renderItem = ({ item }) => {
     const fechaInicio = new Date(item.fechaInicio);
