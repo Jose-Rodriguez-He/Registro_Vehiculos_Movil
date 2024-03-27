@@ -50,7 +50,7 @@ export default function AgregarCalendario() {
       }, []);
 
     //funcion handle para agregar un nuevo calendario a la BD
-    const handleAgregar = async () => {
+    const handleAgregar = async (navigation) => {
       console.log("llego a handleAgregar");
         if (nombreAct === "" || descripcion === "") {
             setNombreErr(true);
@@ -87,61 +87,32 @@ export default function AgregarCalendario() {
     }
     //Funcion para el datepicker
     const onChange = (event, selectedDate) => {
+      setShow(false);
       const currentDate = selectedDate || fechaInicio;
       setFechaInicio(currentDate);
-      setModalVisible(false);
     };
   
-    const showDatePicker = () => {
-      setModalVisible(true);
-    };
+    // const showDatePicker = () => {
+    //   setModalVisible(true);
+    // };
   
-    const hideDatePicker = () => {
-      setModalVisible(false);
+    const showMode = (modeToShow) => {
+      setShow(true);
+      setMode(modeToShow);
     };
     
-    function handleAddEvent(e): void {
-      navigation.navigate('Calendario');
-    }
+    // function handleAddEvent(e): void {
+    //   navigation.navigate('Calendario');
+    // }
 
-    const renderDatePicker = () => {
-      return (
-        <View>
-          {/* <TouchableOpacity onPress={hideDatePicker}>
-            <Text>Cancelar</Text>
-          </TouchableOpacity> */}
-          <DateTimePicker
-            testID="dateTimePicker"
-            value={fechaInicio}
-            mode={"date"}
-            is24Hour={true}
-            display="default"
-            onChange={onChange}
-          />
-          <DateTimePicker
-            testID="dateTimePicker"
-            value={fechaInicio}
-            mode={"time"}
-            is24Hour={true}
-            display="default"
-            onChange={onChange}
-          />
-          
-        </View>
-      );
+    const formatFechaHora = (fecha) => {
+      const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
+      return fecha.toLocaleDateString('es-ES', options);
     };
 
 return (
   <View style={styles.container}>
-    {/* <TouchableOpacity
-        style={styles.button}
-        onPress={handleAddEvent}
-      >
-        <View style={styles.iconContainer}>
-          <Ionicons name="arrow-back-outline" size={35} color="black" />
-          <Text style={styles.text}>Agregar</Text>
-        </View>
-      </TouchableOpacity> */}
+    <Text style={styles.heading}>Agregar una Cita</Text>
     <Text style={styles.label}>Nombre de la actividad:</Text>
     <TextInput
     style={styles.input}
@@ -154,22 +125,46 @@ return (
     <Text style={styles.label}>Fecha de inicio:</Text>
     <TextInput
     style={styles.input}
-      value={fechaInicio.toString()} // Convert fechaInicio to string
+      value={formatFechaHora(fechaInicio)} // Convert fechaInicio to string
       onChangeText={(text) => setFechaInicio(new Date(text))} // Update onChangeText callback
-      placeholder={fechaInicio.toString()}
+      placeholder={"Elija una fecha y hora"}
+      editable={false}
     />
-    {/* {fechaInicioErr && <Text style={styles.error}>Fecha invalida</Text>} */}
+    <View style={styles.buttonContainer}>
 
-    <Button title="Seleccionar fecha" onPress={showDatePicker} />
+    <Button title="Seleccionar fecha" onPress={()=>showMode('date')} />
+    <Button title="Seleccionar hora" onPress={()=>showMode('time')} />
+    {show && mode === 'date' &&
+      <DateTimePicker
+        testID="dateTimePicker"
+        value={fechaInicio}
+        mode={"date"}
+        is24Hour={true}
+        display="default"
+        onChange={onChange}
+      />
+    }
+    {show && mode === 'time' &&
+      <DateTimePicker
+        testID="dateTimePicker"
+        value={fechaInicio}
+        mode={"time"}
+        is24Hour={true}
+        display="default"
+        onChange={onChange}
+      />
+    }
     {fechaInicioErr && <Text style={styles.error}>Seleccione una fecha de inicio válida</Text>}
 
-    <Modal
+    </View>
+      
+    {/* <Modal
       animationType="slide"
       transparent={false}
       visible={modalVisible}
       onRequestClose={hideDatePicker}>
       {renderDatePicker()}
-    </Modal>
+    </Modal> */}
 
     {/* <Text style={styles.label}>Estado de la actividad:</Text> */}
 
@@ -182,18 +177,18 @@ return (
     />
     {descripcionErr && <Text style={styles.error}>Ingrese una descripción válida</Text>}
 
-    <Text style={styles.label}>Propietario ID:</Text>
+    {/* <Text style={styles.label}>Propietario ID:</Text>
     <TextInput
       style={styles.input}
       value={propietario_id}
       onChangeText={setPropietario_id}
       placeholder="Ingrese el ID del propietario"
-    />
+    /> */}
     {/* {propietario_idErr && <Text style={styles.error}>Ingrese un ID de propietario válido</Text>} */}
 
     <Button
       title="Agregar"
-      onPress={handleAgregar}
+      onPress={()=>handleAgregar(navigation)}
     />
   </View>
 );
@@ -206,9 +201,15 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between', // Puedes ajustar esto según tus necesidades
+    marginVertical: 1, // Añade un margen si es necesario
+  },
   label: {
     fontSize: 18,
     marginBottom: 5,
+    marginTop: 10,
   },
   input: {
     height: 40,
@@ -218,6 +219,11 @@ const styles = StyleSheet.create({
   },
   datePicker: {
     marginBottom: 10,
+  },
+  heading: {
+    fontSize: 24,
+    textAlign: 'center',
+    marginTop: 20,
   },
   error: {
     color: 'red',

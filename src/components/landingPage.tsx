@@ -19,12 +19,12 @@ export default function LandingPage() {
       <Auto_Imagen
           //ajustar la imagen
           width={windowWidth}
-          height={windowHeight * 0.3} // Ajusta esto según tus necesidades
-          style={{ ...styles.imagen, aspectRatio: 0.5 }}
+          height={windowHeight * 0.45} // Ajusta esto según tus necesidades
+          style={{ ...styles.imagen, aspectRatio: 1 }}
           // style={styles.image}
         />
         <Text style={styles.heading}>
-          El mantenimiento de tu auto al alcance de tu mano
+          El mantenimiento de tu auto, al alcance de tu mano
         </Text>
       </View>
     </View>
@@ -36,6 +36,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  circleView: {
+    width: 100, // o el tamaño que desees
+    height: 100, // este debe ser igual al ancho para obtener un círculo perfecto
+    borderRadius: 50, // la mitad del tamaño del ancho y la altura
+    backgroundColor: 'blue', // o el color que desees
   },
   imagen: {
     flex: 1,
@@ -52,13 +58,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   image: {
-    resizeMode: 'contain',
+    //resizeMode: 'contain',
     flex:1,
+    
     //borderRadius: 100, // Esto hará que la imagen sea circular
   },
   heading: {
-    fontSize: 24,
+    fontSize: 30,
     textAlign: 'center',
-    marginTop: 20,
+    marginTop: 10,
   },
 });

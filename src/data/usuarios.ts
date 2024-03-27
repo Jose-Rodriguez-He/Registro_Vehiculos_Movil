@@ -1,4 +1,6 @@
 import axios from "axios";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL, TOKEN_SECRET } from '@env';
 
 export interface IUsuarioModel {
     name: string;
@@ -17,37 +19,37 @@ export interface IUsuarioModel {
 }
 
 const getUser = async (id: string) => {
-    const res = await axios.get(`${process.env.API_URL}/usuario/${id}`);
+    const res = await axios.get(`${API_URL}/usuario/${id}`);
     return res.data;
 }
 
 const getUsers = async () => {
-    const res = await axios.get(`${process.env.API_URL}/usuarios`);
+    const res = await axios.get(`${API_URL}/usuarios`);
     return res.data;
 }
 
 const deleteUser = async (id: string) => {
-    const res = await axios.get(`${process.env.API_URL}/usuario/delete/${id}`);
+    const res = await axios.get(`${API_URL}/usuario/delete/${id}`);
     return res.data;
 }
 
 const updateUser = async (id: string, userData: IUsuarioModel) => {
     console.log(userData);
-    const token = localStorage.getItem('auth-token');
+    const token = await AsyncStorage.getItem('auth-token');
     const headers = {
         'auth-token': token,
     };
-    const res = await axios.put(`${process.env.API_URL}/usuario/update/${id}`, userData,{headers});
+    const res = await axios.put(`${API_URL}/usuario/update/${id}`, userData,{headers});
     return res.data;
 }
 
 const registerUser = async (userData: IUsuarioModel) => {
-    const res = await axios.post(`${process.env.API_URL}/usuario/register`, userData);
+    const res = await axios.post(`${API_URL}/usuario/register`, userData);
     return res.data;
 }
 
 const loginUser = async (email: string, password: string) => {
-    const res = await axios.post(`${process.env.API_URL}/usuario/login`, { email, password });
+    const res = await axios.post(`${API_URL}/usuario/login`, { email, password });
     return res.data;
 }
 
