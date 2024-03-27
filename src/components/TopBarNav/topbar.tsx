@@ -8,12 +8,12 @@ function TopNavBar() {
   const [modalVisible, setModalVisible] = useState(false);
   const navigation = useNavigation();
 
-  const handleNavigation = (route: string) => {
+  const handleNavigation = (route: string,navigation) => {
     setModalVisible(false);
     navigation.navigate(route);
   };
 
-  const handleLogout = async () => {
+  const handleLogout = async (navigation) => {
     try {
       await AsyncStorage.removeItem('auth-token');
       navigation.navigate('Login');
@@ -40,19 +40,19 @@ function TopNavBar() {
           activeOpacity={1}
           onPressOut={() => setModalVisible(false)}>
         <View style={styles.modalView}>
-          <TouchableOpacity onPress={() => handleNavigation('Perfil')}>
+          <TouchableOpacity onPress={() => handleNavigation('Perfil',navigation)}>
             <Text style={styles.modalText}>Perfil</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => handleNavigation('Calendario')}>
+          <TouchableOpacity onPress={() => handleNavigation('Calendario',navigation)}>
             <Text style={styles.modalText}>Calendario</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => handleNavigation('Vehiculos')}>
+          <TouchableOpacity onPress={() => handleNavigation('Vehiculos',navigation)}>
             <Text style={styles.modalText}>Vehículos</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => handleNavigation('Diagnosticos')}>
+          <TouchableOpacity onPress={() => handleNavigation('Diagnosticos',navigation)}>
             <Text style={styles.modalText}>Diagnósticos</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleLogout}>
+          <TouchableOpacity onPress={() => handleLogout(navigation)}>
             <Text style={styles.modalText}>Cerrar Sesión</Text>
           </TouchableOpacity>
         </View>

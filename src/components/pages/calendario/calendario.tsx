@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Button } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, Button, Modal, SafeAreaView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { obtenerFiltroCalendario } from '../../../data/CalendarioData';
+import {eliminarItemCalendario} from '../../../data/CalendarioData';
 import  decodeJWT  from '../../../utils/decodeToken';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -12,25 +13,31 @@ export default function CalendarioBody() {
   const [calendarios, setCalendarios] = useState([]);
   const [userId, setUserId] = useState('');
   const navigation = useNavigation();
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
   
 
   useEffect(() => {
-    // Aquí obtendrías el ID del usuario y cargarías los datos del calendario
+    // Aquí se obtiene el ID del usuario y se cargan los datos del calendario
     const cargarDatos = async () => {
     const token = await AsyncStorage.getItem('auth-token');
       //const idUsuario = await AsyncStorage.getItem('userId');
       const decoded = decodeJWT(token);
-      console.log("decoded: "+decoded.id);
+      // console.log("decoded: "+decoded.id);
       setUserId(decoded.id);
       
-      // Aquí llamarías a obtenerFiltroCalendario u obtenerListaCalendario
       const datosCalendario = await obtenerFiltroCalendario(decoded.id);
       //console.log(datosCalendario);
         setCalendarios(datosCalendario);
     };
+    const unsubscribe = navigation.addListener('focus', () => {
+      // Recargar datos del calendario cuando la pantalla obtiene el foco
+      cargarDatos();
+  });
 
     cargarDatos();
-  }, []);
+    return unsubscribe;
+  }, [navigation]);
 
   const renderItem = ({ item }) => {
     const fechaInicio = new Date(item.fechaInicio);
@@ -52,20 +59,50 @@ export default function CalendarioBody() {
     );
   };
 
-  const handleRowPress = (item) => {
-    // Lógica para manejar la pulsación de una fila
+  const handleNavigation = (route: string,navigation) => {
+    setModalVisible(false);
+    navigation.navigate(route, { calendario: selectedItem });
   };
 
-  function handleAddEvent(e): void {
+  //Funcion para abrir menu de opciones cuando se presiona una fila de la tabla
+  const handleRowPress = (item) => {
+   console.log("Presionado: "+item.nombreAct);
+   setSelectedItem(item);
+   setModalVisible(true);
+   console.log("Modal: "+modalVisible);
+   
+  };
+
+  //Funcion para abrir la pantalla de agregar calendario
+  function handleAddEvent(navigation): void {
     navigation.navigate('AgregarCalendario');
   }
 
+  //Eliminar un elemento de la fila
+  const [modalDeleteVisible, setModalDeleteVisible] = useState(false);
+
+    const handleEliminarCalendario = async (id) => {
+        try {
+            const res = await eliminarItemCalendario(id);
+            console.log(res);
+            setModalVisible(false);
+            setModalDeleteVisible(false);
+            // Recargar datos del calendario
+            const datosCalendario = await obtenerFiltroCalendario(userId);
+            setCalendarios(datosCalendario);
+            setModalDeleteVisible(false);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
   return (
     <View style={{ flex: 1 }}>
-      <Text style={styles.heading}>Calendario</Text>
+      <SafeAreaView>
+      <Text style={styles.heading}>Registro de Citas</Text>
       <TouchableOpacity
         style={styles.button}
-        onPress={handleAddEvent}
+        onPress={() => handleAddEvent(navigation)}
       >
         <View style={styles.iconContainer}>
           <Ionicons name="add-outline" size={35} color="black" />
@@ -84,6 +121,46 @@ export default function CalendarioBody() {
         renderItem={renderItem}
         keyExtractor={(item) => item._id}
       />
+
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}>
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setModalVisible(false)}>
+          <View style={styles.modalView}>
+            <TouchableOpacity onPress={() => handleNavigation('EditarCalendario',navigation)}>
+              <Text style={styles.modalText}>Editar Calendario</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setModalDeleteVisible(true)}>
+              <Text style={styles.modalText}>Eliminar Calendario </Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      <Modal
+            animationType="fade"
+            transparent={true}
+            visible={modalDeleteVisible}
+            onRequestClose={() => setModalDeleteVisible(false)}>
+                 <TouchableOpacity
+                style={styles.modalOverlay}
+                activeOpacity={1}
+                onPress={() => setModalDeleteVisible(false)}>
+                <View style={styles.modalView}>
+                    <Text>¿Estás seguro que deseas eliminar el calendario?</Text>
+                    <View style={styles.buttonContainer}>
+                        <Button title="Eliminar" onPress={() => handleEliminarCalendario(selectedItem._id)} />
+                        <Button title="Cancelar" onPress={() => setModalDeleteVisible(false)} />
+                    </View>
+                </View>
+                </TouchableOpacity>
+            </Modal>
+      </SafeAreaView>
     </View>
   );
 }
@@ -97,6 +174,11 @@ const styles = StyleSheet.create({
   text: {
     color: 'black',
     marginLeft: 1,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between', // Puedes ajustar esto según tus necesidades
+    marginVertical: 1, // Añade un margen si es necesario
   },
   iconContainer: {
     flexDirection: 'row',
@@ -126,4 +208,31 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
+  modalText: {
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+
+    // ... Otros estilos
+    modalOverlay: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fondo semi-transparente
+    },
+    modalView: {
+      margin: 20,
+      backgroundColor: 'white',
+      borderRadius: 20,
+      padding: 35,
+      alignItems: 'center',
+      shadowColor: '#000',
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 5,
+    },
   });

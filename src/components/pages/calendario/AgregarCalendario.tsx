@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Button, TextInput, Switch, Platform, Modal } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, Button, TextInput, Switch, Platform, Modal, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { obtenerFiltroCalendario,crearItemCalendario } from '../../../data/CalendarioData';
 import { ObtenerUserId } from '../../../utils/DatosUsarioToken';
+import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import  decodeJWT  from '../../../utils/decodeToken';
 
@@ -10,6 +12,7 @@ import  decodeJWT  from '../../../utils/decodeToken';
 export default function AgregarCalendario() {
 
     const [userId, setUserId] = useState('');
+    const navigation = useNavigation();
     //Variables para el datepicker
     const [date, setDate] = useState(new Date());
     const [mode, setMode] = useState('date');
@@ -19,7 +22,7 @@ export default function AgregarCalendario() {
     const [nombreAct, setNombre] = useState<string>("");
     const [nombreErr, setNombreErr] = useState<boolean>(false);
 
-    const [fechaInicio, setFechaInicio] = useState<Date>();
+    const [fechaInicio, setFechaInicio] = useState(new Date());
     const [fechaInicioErr, setFechaInicioErr] = useState<boolean>(false);
 
     const [estadoActividad, setEstadoActividad] = useState<boolean>();
@@ -47,18 +50,19 @@ export default function AgregarCalendario() {
       }, []);
 
     //funcion handle para agregar un nuevo calendario a la BD
-    const handleAgregar = async () => {
-        if (nombreAct === "") {
+    const handleAgregar = async (navigation) => {
+      console.log("llego a handleAgregar");
+        if (nombreAct === "" || descripcion === "") {
             setNombreErr(true);
-        } else if (fechaInicio === undefined) {
             setFechaInicioErr(true);
-        } else if (estadoActividad === undefined) {
             setEstadoActividadErr(true);
-        } else if (descripcion === "") {
             setDescripcionErr(true);
-        } else if (propietario_id === "") {
             setPropietario_idErr(true);
+            Alert.alert('Error','Rellene los campos',[
+              {text: 'OK', onPress: () => console.log('OK Pressed')}
+            ]);
         } else {
+          console.log("else:")
             const item = {
                 nombreAct: nombreAct,
                 fechaInicio: fechaInicio,
@@ -68,65 +72,47 @@ export default function AgregarCalendario() {
             }
             console.log(item);
             try {
-                const res = await crearItemCalendario(item);
-                console.log(res);
-                alert('Actividad agregada con exito');
+              const res = await crearItemCalendario(item);
+              console.log(res);
+              Alert.alert('Actividad agregada con exito','La actividad ha sido agregada a la base de datos',[
+                {text: 'OK', onPress: () => navigation.navigate('Calendario')}
+              ]);
             } catch (error) {
-                console.error("Error al agregar la actividad: ", error);
-                alert('Error al agregar actividad');
+              console.error("Error al agregar la actividad: ", error);
+              Alert.alert('Error','Ha ocurrido un error, intente nuevamente',[
+                {text: 'OK', onPress: () => console.log('OK Pressed')}
+              ]);
             }
         }
     }
     //Funcion para el datepicker
     const onChange = (event, selectedDate) => {
-      const currentDate = selectedDate || date;
-      setShow(Platform.OS === 'ios');
-      setDate(currentDate);
-  
-      // Process the date values
-      let tempDate = new Date(currentDate);
+      setShow(false);
+      const currentDate = selectedDate || fechaInicio;
       setFechaInicio(currentDate);
-      let fDate = tempDate.getDate() + '/' + (tempDate.getMonth() + 1) + '/' + tempDate.getFullYear();
-      let fTime = 'Hours: ' + tempDate.getHours() + ' | Minutes: ' + tempDate.getMinutes()
-      setText(fDate)
-  
-      // Log the Time & Date values
-      console.log(fTime)
-      console.log(tempDate)
     };
   
-    const showMode = (currentMode) => {
+    // const showDatePicker = () => {
+    //   setModalVisible(true);
+    // };
+  
+    const showMode = (modeToShow) => {
       setShow(true);
-      setMode(currentMode);
+      setMode(modeToShow);
     };
+    
+    // function handleAddEvent(e): void {
+    //   navigation.navigate('Calendario');
+    // }
 
-    const renderDate = () => {
-      return(
-      <View style={styles.container}>
-      <Text style={{ fontWeight: 'bold', fontSize: 20 }}>{text}</Text>
-      <View style={{ margin: 20 }}>
-        <Button onPress={() => showMode('date')} title="DatePicker" />
-      </View>
-      <View style={{ margin: 20 }}>
-        <Button onPress={() => showMode('time')} title="TimePicker" />
-      </View>
-
-      {show && (
-        <DateTimePicker
-          testID="dateTimePicker"
-          value={date}
-          mode={"date"}
-          is24Hour={true}
-          display="default"
-          onChange={onChange}
-        />
-      )}
-    </View>
-    );
-  }
+    const formatFechaHora = (fecha) => {
+      const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
+      return fecha.toLocaleDateString('es-ES', options);
+    };
 
 return (
   <View style={styles.container}>
+    <Text style={styles.heading}>Agregar una Cita</Text>
     <Text style={styles.label}>Nombre de la actividad:</Text>
     <TextInput
     style={styles.input}
@@ -137,26 +123,50 @@ return (
     {nombreErr && <Text style={styles.error}>Ingrese un nombre válido</Text>}
 
     <Text style={styles.label}>Fecha de inicio:</Text>
-    <Button title='Seleccionar fecha' onPress={() => setModalVisible(true)} />
-    <Modal
+    <TextInput
+    style={styles.input}
+      value={formatFechaHora(fechaInicio)} // Convert fechaInicio to string
+      onChangeText={(text) => setFechaInicio(new Date(text))} // Update onChangeText callback
+      placeholder={"Elija una fecha y hora"}
+      editable={false}
+    />
+    <View style={styles.buttonContainer}>
+
+    <Button title="Seleccionar fecha" onPress={()=>showMode('date')} />
+    <Button title="Seleccionar hora" onPress={()=>showMode('time')} />
+    {show && mode === 'date' &&
+      <DateTimePicker
+        testID="dateTimePicker"
+        value={fechaInicio}
+        mode={"date"}
+        is24Hour={true}
+        display="default"
+        onChange={onChange}
+      />
+    }
+    {show && mode === 'time' &&
+      <DateTimePicker
+        testID="dateTimePicker"
+        value={fechaInicio}
+        mode={"time"}
+        is24Hour={true}
+        display="default"
+        onChange={onChange}
+      />
+    }
+    {fechaInicioErr && <Text style={styles.error}>Seleccione una fecha de inicio válida</Text>}
+
+    </View>
+      
+    {/* <Modal
       animationType="slide"
       transparent={false}
       visible={modalVisible}
-      onRequestClose={() => {
-        setModalVisible(!modalVisible);
-      }}>
-        {renderDate()}
-    </Modal>
-    {/* <DatePicker
-      style={styles.datePicker}
-      date={fechaInicio}
-      onDateChange={setFechaInicio}
-      mode="date"
-      placeholder="Seleccione la fecha de inicio"
-    /> */}
-    {fechaInicioErr && <Text style={styles.error}>Seleccione una fecha de inicio válida</Text>}
+      onRequestClose={hideDatePicker}>
+      {renderDatePicker()}
+    </Modal> */}
 
-    <Text style={styles.label}>Estado de la actividad:</Text>
+    {/* <Text style={styles.label}>Estado de la actividad:</Text> */}
 
     <Text style={styles.label}>Descripción:</Text>
     <TextInput
@@ -167,18 +177,18 @@ return (
     />
     {descripcionErr && <Text style={styles.error}>Ingrese una descripción válida</Text>}
 
-    <Text style={styles.label}>Propietario ID:</Text>
+    {/* <Text style={styles.label}>Propietario ID:</Text>
     <TextInput
       style={styles.input}
       value={propietario_id}
       onChangeText={setPropietario_id}
       placeholder="Ingrese el ID del propietario"
-    />
-    {propietario_idErr && <Text style={styles.error}>Ingrese un ID de propietario válido</Text>}
+    /> */}
+    {/* {propietario_idErr && <Text style={styles.error}>Ingrese un ID de propietario válido</Text>} */}
 
     <Button
       title="Agregar"
-      onPress={handleAgregar}
+      onPress={()=>handleAgregar(navigation)}
     />
   </View>
 );
@@ -191,9 +201,15 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between', // Puedes ajustar esto según tus necesidades
+    marginVertical: 1, // Añade un margen si es necesario
+  },
   label: {
     fontSize: 18,
     marginBottom: 5,
+    marginTop: 10,
   },
   input: {
     height: 40,
@@ -204,8 +220,27 @@ const styles = StyleSheet.create({
   datePicker: {
     marginBottom: 10,
   },
+  heading: {
+    fontSize: 24,
+    textAlign: 'center',
+    marginTop: 20,
+  },
   error: {
     color: 'red',
     marginBottom: 10,
+  },
+  button: {
+    // backgroundColor: '#008CBA',
+    padding: 0,
+    // borderRadius: 5,
+  },
+  text: {
+    color: 'black',
+    marginLeft: 1,
+  },
+  iconContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
   },
 });
